@@ -6,6 +6,10 @@ authors = ["Kasper Kronborg Larsen <kkro@inspari.dk>"]
 
 [tool.poetry.dependencies]
 python = "^3.8"
+azure-core = "^1.11.0"
+azure-ai-formrecognizer = "^3.0.0"
+pathlib = "^1.0.1"
+PyYAML = "^5.4.1"
 
 [tool.poetry.dev-dependencies]
 pytest = "^5.2"
