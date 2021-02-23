@@ -19,7 +19,7 @@ class AzureCredentials:
 
         with open(db_path, mode="r", encoding="utf-8") as cred:
             content = yaml.full_load(cred)
-            return DbConfig(
+            return AzureCredentials(
                 endpoint=content.get("endpoint"),
                 key=content.get("key"),
             )

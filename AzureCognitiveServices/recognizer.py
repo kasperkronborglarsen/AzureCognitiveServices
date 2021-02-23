@@ -20,8 +20,12 @@ USAGE:
     1) AZURE_FORM_RECOGNIZER_ENDPOINT - the endpoint to your Cognitive Services resource.
     2) AZURE_FORM_RECOGNIZER_KEY - your Form Recognizer API key
 """
-from AzureConnect.connect import AzureCredentials
-import os
+from AzureCognitiveServices.helpers.azure_connection import AzureCredentials
+from AzureCognitiveServices.helpers.csv_helper import save_csv
+from pathlib import Path
+
+import pandas as pd
+
 
 
 class RecognizeReceiptsFromURLSample(object):
@@ -30,6 +34,7 @@ class RecognizeReceiptsFromURLSample(object):
         # [START recognize_receipts_from_url]
         from azure.core.credentials import AzureKeyCredential
         from azure.ai.formrecognizer import FormRecognizerClient
+
 
         azCredentials = AzureCredentials.load(db_path)
 
@@ -43,17 +48,22 @@ class RecognizeReceiptsFromURLSample(object):
         poller = form_recognizer_client.begin_recognize_receipts_from_url(receipt_url=url)
         receipts = poller.result()
 
+        df = pd.DataFrame()
+
         for idx, receipt in enumerate(receipts):
             print("--------Recognizing receipt #{}--------".format(idx+1))
             receipt_type = receipt.fields.get("ReceiptType")
             if receipt_type:
                 print("Receipt Type: {} has confidence: {}".format(receipt_type.value, receipt_type.confidence))
+                df = df.append({'ReceiptType': receipt_type.value, 'ReceiptTypeConfidence': receipt_type.confidence}, ignore_index=True)
             merchant_name = receipt.fields.get("MerchantName")
             if merchant_name:
                 print("Merchant Name: {} has confidence: {}".format(merchant_name.value, merchant_name.confidence))
+                df = df.append({'MerchantName': merchant_name.value, 'MerchantNameConfidence': merchant_name.confidence}, ignore_index=True)
             transaction_date = receipt.fields.get("TransactionDate")
             if transaction_date:
                 print("Transaction Date: {} has confidence: {}".format(transaction_date.value, transaction_date.confidence))
+                df = df.append({'TransactionDate': transaction_date.value, 'TransactionDateConfidence': transaction_date.confidence}, ignore_index=True)
             print("Receipt items:")
             for idx, item in enumerate(receipt.fields.get("Items").value):
                 print("...Item #{}".format(idx+1))
@@ -84,7 +94,11 @@ class RecognizeReceiptsFromURLSample(object):
             print("--------------------------------------")
         # [END recognize_receipts_from_url]
 
+        return df
+
 
 if __name__ == '__main__':
     sample = RecognizeReceiptsFromURLSample()
-    sample.recognize_receipts_from_url()
+    df = sample.recognize_receipts_from_url(Path("config/secrets/credentials.yaml"))
+
+    save_csv(df, "data/output.csv")
