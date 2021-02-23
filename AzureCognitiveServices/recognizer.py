@@ -49,21 +49,25 @@ class RecognizeReceiptsFromURLSample(object):
         receipts = poller.result()
 
         df = pd.DataFrame()
+        receipt_data = {"ReceiptType": None, "ReceiptConfidence": None, "MerchantName": None, "MerchantNameConfidence": None, "TransactionDate": None, "TransactionDateConfidence": None}
 
         for idx, receipt in enumerate(receipts):
             print("--------Recognizing receipt #{}--------".format(idx+1))
             receipt_type = receipt.fields.get("ReceiptType")
             if receipt_type:
                 print("Receipt Type: {} has confidence: {}".format(receipt_type.value, receipt_type.confidence))
-                df = df.append({'ReceiptType': receipt_type.value, 'ReceiptTypeConfidence': receipt_type.confidence}, ignore_index=True)
+                receipt_data["ReceiptType"] = receipt_type.value
+                receipt_data["ReceiptConfidence"] = receipt_type.confidence
             merchant_name = receipt.fields.get("MerchantName")
             if merchant_name:
                 print("Merchant Name: {} has confidence: {}".format(merchant_name.value, merchant_name.confidence))
-                df = df.append({'MerchantName': merchant_name.value, 'MerchantNameConfidence': merchant_name.confidence}, ignore_index=True)
+                receipt_data["MerchantName"] = merchant_name.value
+                receipt_data["MerchantNameConfidence"] = merchant_name.confidence
             transaction_date = receipt.fields.get("TransactionDate")
             if transaction_date:
                 print("Transaction Date: {} has confidence: {}".format(transaction_date.value, transaction_date.confidence))
-                df = df.append({'TransactionDate': transaction_date.value, 'TransactionDateConfidence': transaction_date.confidence}, ignore_index=True)
+                receipt_data["TransactionDate"] = transaction_date.value
+                receipt_data["TransactionDateConfidence"] = transaction_date.confidence
             print("Receipt items:")
             for idx, item in enumerate(receipt.fields.get("Items").value):
                 print("...Item #{}".format(idx+1))
@@ -94,6 +98,7 @@ class RecognizeReceiptsFromURLSample(object):
             print("--------------------------------------")
         # [END recognize_receipts_from_url]
 
+        df = pd.DataFrame([receipt_data])
         return df
 
 
