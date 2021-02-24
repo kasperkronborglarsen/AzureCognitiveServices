@@ -11,12 +11,14 @@ azure-ai-formrecognizer = "^3.0.0"
 pathlib = "^1.0.1"
 PyYAML = "^5.4.1"
 pandas = "^1.2.2"
+click = "^7.1.2"
 
 [tool.poetry.dev-dependencies]
 pytest = "^5.2"
 pre-commit = "^2.10.1"
 flake8 = "^3.8.4"
 black = "^20.8b1"
+rope = "^0.18.0"
 
 [build-system]
 requires = ["poetry-core>=1.0.0"]
