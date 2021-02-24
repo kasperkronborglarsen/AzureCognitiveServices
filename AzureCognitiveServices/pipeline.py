@@ -1,19 +1,46 @@
-from AzureCognitiveServices.helpers.azure_connection import AzureCredentials
-from AzureCognitiveServices.helpers.csv_helper import save_csv
-from AzureCognitiveServices.recognizer import RecognizeReceiptsFromURLSample
-
+import os
+import glob
 from pathlib import Path
 
 import click
+import pandas as pd
 
-def run_pipeline(url: str):
+from AzureCognitiveServices.recognizer import RecognizeReceiptsFromURLSample
+from AzureCognitiveServices.helpers.csv_helper import save_csv
+
+
+def run_pipeline(image_folder: Path):
     """Runs the full pipeline."""
     sample = RecognizeReceiptsFromURLSample()
 
-    # For testing purpose only
-    url = "https://raw.githubusercontent.com/Azure/azure-sdk-for-python/master/sdk/formrecognizer/azure-ai-formrecognizer/tests/sample_forms/receipt/contoso-receipt.png"
-    
-    df_receipts, df_items = sample.recognize_receipts_from_url(url)
+    df_receipts = pd.DataFrame(
+        columns=[
+            "ReceiptId",
+            "ReceiptType",
+            "ReceiptConfidence",
+            "MerchantName",
+            "MerchantNameConfidence",
+            "TransactionDate",
+            "TransactionDateConfidence",
+            "Subtotal",
+            "SubtotalConfidence",
+            "Tax",
+            "TaxConfidence",
+            "Tip",
+            "TipConfidence",
+            "Total",
+            "TotalConfidence",
+        ]
+    )
+    df_items = pd.DataFrame(
+        columns=["ReceiptId", "Name", "Quantity", "Price", "TotalPrice"]
+    )
+
+    for filename in glob.glob(os.path.join(image_folder, "*.*")):
+
+        receipts, items = sample.recognize_receipts_from_url(Path(filename))
+        df_receipts = pd.concat([df_receipts, pd.DataFrame([receipts])])
+        df_items = pd.concat([df_items, pd.DataFrame(items)])
 
     save_csv(df_receipts, "data/receiptdata.csv")
     save_csv(df_items, "data/itemsdata.csv")
@@ -21,14 +48,11 @@ def run_pipeline(url: str):
 
 @click.command(help="Runs the recognizer pipeline.")
 @click.option(
-    "-u",
-    "--url",
-    type=click.STRING,
-    required=True,
+    "-i", "--image-folder", type=click.STRING, required=True,
 )
-def main(url: str):
+def main(image_folder: str):
     """Runs the pipeline."""
-    run_pipeline(url=url)
+    run_pipeline(image_folder=Path(image_folder))
 
 
 if __name__ == "__main__":
