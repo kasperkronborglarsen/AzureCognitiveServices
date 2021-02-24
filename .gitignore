@@ -147,5 +147,6 @@ mlruns
 
 # For demo purpose
 data/*.*
+data/**
 .secrets/
 config/secrets/*.*
