@@ -54,9 +54,9 @@ class RecognizeReceiptsFromURLSample(object):
         for idx, receipt in enumerate(receipts):
             print("--------Recognizing receipt #{}--------".format(idx + 1))
 
-            add_value_to_dict("ReceiptType", receipt, receipt_data)
-            add_value_to_dict("MerchantName", receipt, receipt_data)
-            add_value_to_dict("TransactionDate", receipt, receipt_data)
+            add_receipt_field_to_dict("ReceiptType", receipt, receipt_data)
+            add_receipt_field_to_dict("MerchantName", receipt, receipt_data)
+            add_receipt_field_to_dict("TransactionDate", receipt, receipt_data)
 
             """ receipt_type = receipt.fields.get("ReceiptType")
             if receipt_type:
@@ -95,7 +95,7 @@ class RecognizeReceiptsFromURLSample(object):
                 print("Receipt items:")
                 for idx, item in enumerate(items.value):
                     print("...Item #{}".format(idx + 1))
-                    item_name = item.value.get("Name")
+                    # item_name = item.value.get("Name")
                     items_data = {
                         "ReceiptId": receipt_id,
                         "Name": None,
@@ -109,9 +109,12 @@ class RecognizeReceiptsFromURLSample(object):
                     }
                     items_array.append(items_data)
 
-                    # add_value_to_dict("Name", receipt, items_data)
+                    add_receipt_item_to_dict("Name", item, items_data)
+                    add_receipt_item_to_dict("Quantity", item, items_data)
+                    add_receipt_item_to_dict("Price", item, items_data)
+                    add_receipt_item_to_dict("TotalPrice", item, items_data)
 
-                    if item_name:
+                    """ if item_name:
                         items_data["Name"] = item_name.value
                         print(
                             "......Item Name: {} has confidence: {}".format(
@@ -142,8 +145,14 @@ class RecognizeReceiptsFromURLSample(object):
                                 item_total_price.value, item_total_price.confidence
                             )
                         )
+ """
 
-            subtotal = receipt.fields.get("Subtotal")
+            add_receipt_field_to_dict("Subtotal", receipt, receipt_data)
+            add_receipt_field_to_dict("Tax", receipt, receipt_data)
+            add_receipt_field_to_dict("Tip", receipt, receipt_data)
+            add_receipt_field_to_dict("Total", receipt, receipt_data)
+
+            """ subtotal = receipt.fields.get("Subtotal")
             if subtotal:
                 print(
                     "Subtotal: {} has confidence: {}".format(
@@ -171,17 +180,26 @@ class RecognizeReceiptsFromURLSample(object):
                     "Total: {} has confidence: {}".format(total.value, total.confidence)
                 )
                 receipt_data["Total"] = total.value
-                receipt_data["TotalConfidence"] = total.confidence
+                receipt_data["TotalConfidence"] = total.confidence """
             print("--------------------------------------")
 
         form_recognizer_client.close()
         return receipt_data, items_array
 
 
-def add_value_to_dict(fieldName: str, receipt, data: Dict[str, Optional[str]]):
-    """Adds item value and confidence to dict."""
-    item = receipt.fields.get(fieldName)
+def add_receipt_field_to_dict(fieldName: str, receipt, data: Dict[str, Optional[str]]):
+    """Adds receipt field value and confidence to dict."""
+    receipt_field = receipt.fields.get(fieldName)
 
-    if item:
-        data[fieldName] = item.value
-        data[fieldName + "Confidence"] = item.confidence
+    if receipt_field:
+        data[fieldName] = receipt_field.value
+        data[fieldName + "Confidence"] = receipt_field.confidence
+
+
+def add_receipt_item_to_dict(fieldName: str, item, data: Dict[str, Optional[str]]):
+    """Adds item field value and confidence to dict."""
+    item_field = item.value.get(fieldName)
+
+    if item_field:
+        data[fieldName] = item_field.value
+        data[fieldName + "Confidence"] = item_field.confidence
