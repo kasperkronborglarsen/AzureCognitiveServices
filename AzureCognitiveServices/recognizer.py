@@ -14,7 +14,7 @@ logger = get_logger(__name__)
 class RecognizeReceiptsFromURLSample(object):
     """Azure recognize class."""
 
-    def recognize_receipts_from_url(self, image_path: Path):  # noqa: C901
+    def recognize_receipts_from_folder(self, image_path: Path):  # noqa: C901
         """Azure recognize method."""
         cred_path = Path("config/secrets/credentials.yaml")
         azCredentials = AzureCredentials.load(cred_path)

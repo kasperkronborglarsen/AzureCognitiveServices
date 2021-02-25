@@ -53,7 +53,7 @@ def run_pipeline(image_folder: Path):
 
     for filename in glob.glob(os.path.join(image_folder, "*.*")):
 
-        receipts, items = sample.recognize_receipts_from_url(Path(filename))
+        receipts, items = sample.recognize_receipts_from_folder(Path(filename))
         df_receipts = pd.concat([df_receipts, pd.DataFrame([receipts])])
         df_items = pd.concat([df_items, pd.DataFrame(items)])
 
