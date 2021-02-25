@@ -7,10 +7,15 @@ import pandas as pd
 
 from AzureCognitiveServices.recognizer import RecognizeReceiptsFromURLSample
 from AzureCognitiveServices.helpers.csv_helper import save_csv
+from AzureCognitiveServices.helpers.logging_helpers import get_logger
+
+logger = get_logger(__name__)
 
 
 def run_pipeline(image_folder: Path):
     """Runs the full pipeline."""
+    logger.debug("Running pipeline")
+
     sample = RecognizeReceiptsFromURLSample()
 
     df_receipts = pd.DataFrame(
