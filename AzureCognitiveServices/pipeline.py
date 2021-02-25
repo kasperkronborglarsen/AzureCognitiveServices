@@ -17,7 +17,7 @@ def run_pipeline(image_folder: Path):
         columns=[
             "ReceiptId",
             "ReceiptType",
-            "ReceiptConfidence",
+            "ReceiptTypeConfidence",
             "MerchantName",
             "MerchantNameConfidence",
             "TransactionDate",
@@ -33,7 +33,17 @@ def run_pipeline(image_folder: Path):
         ]
     )
     df_items = pd.DataFrame(
-        columns=["ReceiptId", "Name", "Quantity", "Price", "TotalPrice"]
+        columns=[
+            "ReceiptId",
+            "Name",
+            "NameConfidence",
+            "Quantity",
+            "QuantityConfidence",
+            "Price",
+            "PriceConfidence",
+            "TotalPrice",
+            "TotalPriceConfidence",
+        ]
     )
 
     for filename in glob.glob(os.path.join(image_folder, "*.*")):

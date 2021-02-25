@@ -1,4 +1,5 @@
 import uuid
+from typing import Dict, Optional
 from pathlib import Path
 
 from azure.core.credentials import AzureKeyCredential
@@ -35,7 +36,7 @@ class RecognizeReceiptsFromURLSample(object):
         receipt_data = {
             "ReceiptId": receipt_id,
             "ReceiptType": None,
-            "ReceiptConfidence": None,
+            "ReceiptTypeConfidence": None,
             "MerchantName": None,
             "MerchantNameConfidence": None,
             "TransactionDate": None,
@@ -52,11 +53,16 @@ class RecognizeReceiptsFromURLSample(object):
 
         for idx, receipt in enumerate(receipts):
             print("--------Recognizing receipt #{}--------".format(idx + 1))
-            receipt_type = receipt.fields.get("ReceiptType")
+
+            add_value_to_dict("ReceiptType", receipt, receipt_data)
+            add_value_to_dict("MerchantName", receipt, receipt_data)
+            add_value_to_dict("TransactionDate", receipt, receipt_data)
+
+            """ receipt_type = receipt.fields.get("ReceiptType")
             if receipt_type:
                 print(
                     "Receipt Type: {} has confidence: {}".format(
-                        receipt_type.value, receipt_type.confidence
+                       receipt_type.value, receipt_type.confidence
                     )
                 )
                 receipt_data["ReceiptType"] = receipt_type.value
@@ -80,7 +86,7 @@ class RecognizeReceiptsFromURLSample(object):
                     )
                 )
                 receipt_data["TransactionDate"] = transaction_date.value
-                receipt_data["TransactionDateConfidence"] = transaction_date.confidence
+                receipt_data["TransactionDateConfidence"] = transaction_date.confidence """
 
             items = receipt.fields.get("Items")
 
@@ -93,11 +99,18 @@ class RecognizeReceiptsFromURLSample(object):
                     items_data = {
                         "ReceiptId": receipt_id,
                         "Name": None,
+                        "NameConfidence": None,
                         "Quantity": None,
+                        "QuantityConfidence": None,
                         "Price": None,
+                        "PriceConfidence": None,
                         "TotalPrice": None,
+                        "TotalPriceConfidence": None,
                     }
                     items_array.append(items_data)
+
+                    # add_value_to_dict("Name", receipt, items_data)
+
                     if item_name:
                         items_data["Name"] = item_name.value
                         print(
@@ -165,8 +178,10 @@ class RecognizeReceiptsFromURLSample(object):
         return receipt_data, items_array
 
 
-if __name__ == "__main__":
-    sample = RecognizeReceiptsFromURLSample()
-    # df_receipts, df_items = sample.recognize_receipts_from_url(
-    #     Path("config/secrets/credentials.yaml")
-    # )
+def add_value_to_dict(fieldName: str, receipt, data: Dict[str, Optional[str]]):
+    """Adds item value and confidence to dict."""
+    item = receipt.fields.get(fieldName)
+
+    if item:
+        data[fieldName] = item.value
+        data[fieldName + "Confidence"] = item.confidence
